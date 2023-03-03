@@ -1,0 +1,86 @@
+%{
+#include <stdio.h>
+#include <stdlib.h>
+%}
+
+%token IF_TOKEN ELSE_TOKEN WHILE_TOKEN FOR_TOKEN FUNCTION_TOKEN RETURN_TOKEN
+%token PLUS_TOKEN MINUS_TOKEN MULTIPLY_TOKEN DIVIDE_TOKEN ASSIGN_TOKEN
+%token EQUALS_TOKEN NOT_EQUALS_TOKEN GREATER_THAN_TOKEN LESS_THAN_TOKEN
+%token GREATER_THAN_EQUAL_TOKEN LESS_THAN_EQUAL_TOKEN
+%token IDENTIFIER_TOKEN INTEGER_LITERAL_TOKEN
+
+%%
+program : statement_list
+        ;
+
+statement_list : statement
+               | statement_list statement
+               ;
+
+statement : expression_statement
+          | if_statement
+          | while_statement
+          | for_statement
+          | function_statement
+          | return_statement
+          ;
+
+expression_statement : expression ';'
+                     ;
+
+expression : IDENTIFIER_TOKEN ASSIGN_TOKEN expression
+           | equality_expression
+           ;
+
+equality_expression : relational_expression
+                     | equality_expression EQUALS_TOKEN relational_expression
+                     | equality_expression NOT_EQUALS_TOKEN relational_expression
+                     ;
+
+relational_expression : additive_expression
+                      | relational_expression GREATER_THAN_TOKEN additive_expression
+                      | relational_expression LESS_THAN_TOKEN additive_expression
+                      | relational_expression GREATER_THAN_EQUAL_TOKEN additive_expression
+                      | relational_expression LESS_THAN_EQUAL_TOKEN additive_expression
+                      ;
+
+additive_expression : multiplicative_expression
+                     | additive_expression PLUS_TOKEN multiplicative_expression
+                     | additive_expression MINUS_TOKEN multiplicative_expression
+                     ;
+
+multiplicative_expression : primary_expression
+                          | multiplicative_expression MULTIPLY_TOKEN primary_expression
+                          | multiplicative_expression DIVIDE_TOKEN primary_expression
+                          ;
+
+primary_expression : IDENTIFIER_TOKEN
+                   | INTEGER_LITERAL_TOKEN
+                   | '(' expression ')'
+                   ;
+
+if_statement : IF_TOKEN '(' expression ')' statement
+             | IF_TOKEN '(' expression ')' statement ELSE_TOKEN statement
+             ;
+
+while_statement : WHILE_TOKEN '(' expression ')' statement
+                ;
+
+for_statement : FOR_TOKEN '(' expression_statement expression_statement ')' statement
+              ;
+
+function_statement : FUNCTION_TOKEN IDENTIFIER_TOKEN '(' ')' statement
+                   ;
+
+return_statement : RETURN_TOKEN expression ';'
+                 ;
+
+%%
+int main() {
+    yyparse();
+    return 0;
+}
+
+void yyerror(char *s) {
+    fprintf(stderr, "%s\n", s);
+}
